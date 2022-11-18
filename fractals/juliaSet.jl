@@ -1,15 +1,22 @@
 #Mandelbrot drawing
 using Images, ImageView, Colors, FixedPointNumbers, FileIO
 
-function drawJulia(
+include("iterationFunctions.jl")
+include("util.jl")
+include("colormapFromTSV.jl")
+
+function drawJulia(;
   center::Tuple{Real,Real}=(-0.75,0),
   imageSize = (250,250),
   juliaPoint = 0.0 + 0.0*im,
   zoom=1,
   maxIters::Integer=100,
   bailout=2^8,
-  colorDensity = 1
+  colorDensity = 1,
+  cmapfile = "colormap.tsv"
 )
+
+  cmap = colormapFromTSV(cmapfile)
 
   defaultScale = 1.75
 

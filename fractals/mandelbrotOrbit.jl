@@ -1,4 +1,8 @@
-function drawMandelbrotImage(
+using Images, ImageView, Colors, FixedPointNumbers, FileIO
+
+include("util.jl")
+
+function drawMandelbrotImage(;
   center::Tuple{Real,Real}=(-0.75,0),
   imageSize = (250,250),
   sourceImage = "",
