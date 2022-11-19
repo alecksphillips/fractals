@@ -36,6 +36,11 @@ Probability distribution of points that *do* escape to infinity
 under iteration of the function:
 $$f_c(z) = z^2 + c$$
 
+Using different numbers of max iterations for each channel in 
+an RGB image:
+![buddhabrot](https://github.com/alecksphillips/fractals/blob/main/buddhabrot.png)
+
+
 
 ## Animations
 We can animate the julia set by varying $c$ with time, e.g. moving the point

@@ -118,6 +118,6 @@ function  burningShip(c, maxIters=1000, bailout = 2^8)
     end
   end
 
-  return iter
+  return iter,z
 
 end

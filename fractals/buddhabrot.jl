@@ -2,6 +2,7 @@
 using Images, Colors, FixedPointNumbers, FileIO
 
 include("iterationFunctions.jl")
+include("util.jl")
 
 function drawBuddhabrot(;
   center::Tuple{Real,Real}=(-0.75,0),
@@ -53,8 +54,8 @@ function drawBuddhabrot(;
       print(".")
     end
     c = xmin + rand()*(xmax-xmin) - (ymin + rand()*(ymax-ymin))*im
-    #curIter,z = mandelbrot(c, maxIters, bailout)
-    curIter = burningShip(c, maxIters, bailout)
+    curIter,z = mandelbrot(c, maxIters, bailout)
+    #curIter,z = burningShip(c, maxIters, bailout)
     #Does this point escape?
     if curIter < maxIters
       #Add points of orbit to image
