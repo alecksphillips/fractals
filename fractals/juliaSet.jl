@@ -50,12 +50,14 @@ function drawJulia(;
     end
 
     for i in 1:imageSize[2]
-      relx = xmin + (j-0.5)*(xmax-xmin)/(imageSize[1])
-      rely = ymin + (i-0.5)*(ymax-ymin)/(imageSize[2])
-      c = relx + rely*im
+
+      c = pixelToComplex((i,j), xmin, xmax, ymin, ymax, imageSize)
+      #relx = xmin + (j-0.5)*(xmax-xmin)/(imageSize[1])
+      #rely = ymin + (i-0.5)*(ymax-ymin)/(imageSize[2])
+      #c = relx + rely*im
       #print("i: $i j: $j c: $c")
 
-      iter,z = juliaIterations(c, juliaPoint, maxIters, bailout)
+      iter,z = juliaIterations(c; juliaPoint=juliaPoint, maxIters=maxIters, bailout=bailout)
       histogram[iter] += 1
       if iter < maxIters
         logzn = log(real(z)*real(z) + imag(z)*imag(z))/2
@@ -112,5 +114,5 @@ function drawJulia(;
 
     end
   end
-  img
+  img,cmap
 end

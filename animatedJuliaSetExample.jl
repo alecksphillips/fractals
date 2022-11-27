@@ -1,6 +1,7 @@
 using Images, VideoIO
 
-include("juliaSet.jl")
+include("fractals/iterationFunctions.jl")
+include("fractals/mandelbrot.jl")
 
 fps = 60
 videoLength = 5
@@ -14,7 +15,7 @@ frames = fps*videoLength
 imageSize = (500,500)
 
 juliaCenter = 0 + 0*im
-juliaRadius = 1
+juliaRadius = 2
 
 
 images = fill(Array{RGB{N0f8},2}(undef,imageSize),frames)
@@ -23,11 +24,13 @@ for i in 1:frames
   angle = (i-1)/frames * 2π * cycles
   juliaPoint = juliaCenter + juliaRadius*(cos(angle*real_cycles + + phase_offset)  + sin(angle*im_cycles) * im)
 
-  images[i] = drawJulia(
+  images[i] = drawEscapeTimeFractal(
     center = (0,0),
     imageSize = imageSize,
     maxIters = 1000,
-    juliaPoint = juliaPoint
+    f = juliaPolynomial,
+    juliaPoint = juliaPoint,
+    zoom = 0.5
   )
 end
 

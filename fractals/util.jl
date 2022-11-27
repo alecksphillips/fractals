@@ -1,7 +1,7 @@
 
 function complexToPixel(c, xmin, xmax, ymin, ymax, imageSize)
   j = floor(imageSize[1] * (real(c) - xmin)/(xmax-xmin))
-  i = floor(imageSize[2] * (-imag(c) - ymin)/(ymax-ymin))
+  i = floor(imageSize[2] * (imag(c) - ymin)/(ymax-ymin))
 
   if i < 0 || i > imageSize[1] - 1 || j < 0 || j > imageSize[2] - 1 || isnan(i) || isnan(j)
     p = (-1,-1)
@@ -16,7 +16,7 @@ end
 function pixelToComplex(p, xmin, xmax, ymin, ymax, imageSize)
   relx = xmin + (p[1]-0.5)*(xmax-xmin)/(imageSize[1])
   rely = ymin + (p[2]-0.5)*(ymax-ymin)/(imageSize[2])
-  c = relx - rely*im
+  c = relx + rely*im
 end
 
 function imageMap(img,center,scale)

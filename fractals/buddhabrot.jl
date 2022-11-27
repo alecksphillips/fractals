@@ -10,7 +10,13 @@ function drawBuddhabrot(;
   zoom=1,
   maxIters::Integer=100,
   bailout=3,
-  N = 100
+  N = 100,
+  f::Function = mandelbrot,
+  juliaSet = false,
+  juliaPoint = 0.0 + 0.0*im,
+  flip = "none",
+  rotate = 90,
+  kwargs...
 )
 
   #default = (-2.5,1,-1.75,1.75)
@@ -37,40 +43,71 @@ function drawBuddhabrot(;
     ymax = center[2] - defaultScale*aspectRatio/zoom
   end
   #print("Aspect Ratio: $aspectRatio\n")
-  img = Array{RGB{Float64},2}(undef,imageSize[2],imageSize[1])
-  itersReached = Array{Float64,2}(undef,imageSize[2],imageSize[1])
-
+  
+  
+  if rotate == 0
+    img = Array{RGB{Float64},2}(undef,imageSize[2],imageSize[1])
+    itersReached = Array{Float64,2}(undef,imageSize[2],imageSize[1])
+    dens = zeros(Int64, imageSize[2], imageSize[1])
+  elseif rotate == 90
+    img = Array{RGB{Float64},2}(undef,imageSize[1],imageSize[2])
+    itersReached = Array{Float64,2}(undef,imageSize[1],imageSize[2])
+    dens = zeros(Int64, imageSize[1], imageSize[2])
+  end
 
   histogram = [0 for i in 1:maxIters]
-
-  dens = zeros(Int64, imageSize[2], imageSize[1])
-
-  #guidict = ImageView.imshow(dens)
-  #canvas = guidict["gui"]["canvas"]
 
   print("[")
   for i = 1:N
     if i%floor(N/20) == 0
       print(".")
     end
-    c = xmin + rand()*(xmax-xmin) - (ymin + rand()*(ymax-ymin))*im
-    curIter,z = mandelbrot(c, maxIters, bailout)
-    #curIter,z = burningShip(c, maxIters, bailout)
+    p = xmin + rand()*(xmax-xmin) + (ymin + rand()*(ymax-ymin))*im
+
+    if juliaSet
+      z0 = p
+      c = juliaPoint 
+    else
+      c = p
+      z0 = 0.0+0.0*im
+    end
+    curIter,z = iterateToEscape(z0, f = f, maxIters=maxIters, bailout = bailout, c = c, kwargs...)
+    
     #Does this point escape?
     if curIter < maxIters
-      #Add points of orbit to image
-      z = 0 + 0im
+      z = z0
       for iter = 1:curIter
-        #z = (abs(real(z)) + im*abs(imag(z)))^2 + c
-        z = z*z + c
-        p = complexToPixel(z, xmin, xmax, ymin,ymax, imageSize)
+        z = f(z, c = c)
+        z1 = z
+        if (flip == "ud" || flip == "udlr")
+          z1 = real(z1) - imag(z1)*im
+        end
+    
+        if (flip == "lr" || flip == "udlr")
+          z1 = -real(z1) + imag(z1)*im
+        end
+        p = complexToPixel(z1, xmin, xmax, ymin,ymax, imageSize)
+        
         if p[1] > 0
-          dens[p[2],p[1]] += 1
-          p = complexToPixel(real(z) - imag(z)*im, xmin,xmax,ymin,ymax,imageSize)
-          if p[1] > 0
+          if rotate == 90
+            dens[p[1],p[2]] += 1
+          else 
             dens[p[2],p[1]] += 1
           end
+
+          if Symbol(f) == Symbol("mandelbrot")
+            #mandelbrot is symmetric
+            p = complexToPixel(real(z1) - imag(z1)*im, xmin,xmax,ymin,ymax,imageSize)
+            if p[1] > 0
+              if rotate == 90
+                dens[p[1],p[2]] += 1
+              else 
+                dens[p[2],p[1]] += 1
+              end
+            end
+          end
         end
+      
       end
     else
       #Carry on (my wayward son)
@@ -81,3 +118,6 @@ function drawBuddhabrot(;
   dens/maximum(dens)
 
 end
+
+
+
