@@ -44,15 +44,12 @@ function drawEscapeTimeFractal(;
   img = Array{RGB{Float64},2}(undef,imageSize[2],imageSize[1])
   itersReached = Array{Float64,2}(undef,imageSize[2],imageSize[1])
 
+  complexValues = Array{Complex{Float64},2}(undef, imageSize[2], imageSize[1])
+  controlPoints = Array{Complex{Float64},2}(undef, imageSize[2], imageSize[1])
+
 
   histogram = [0 for i in 1:maxIters]
-  print("[")
   for j in 1:imageSize[1]
-    if j%(floor(imageSize[1]/50)) == 0
-      print(".")
-    #  print("$(Integer(floor(100*j/imageSize[1])))%\n")
-    end
-
     for i in 1:imageSize[2]
       p = pixelToComplex((j,i), xmin, xmax, ymin, ymax, imageSize)
       if (flip == "ud" || flip == "udlr")
@@ -63,35 +60,47 @@ function drawEscapeTimeFractal(;
         p = -real(p) + imag(p)*im
       end
 
-      if juliaSet
-        z0 = p
-        c = juliaPoint 
-      else
-        c = p
-        z0 = 0.0+0.0*im
-      end
-        
-      iter,z = iterateToEscape(
-        z0,
-        maxIters=maxIters,
-        bailout = bailout,
-        f = f,
-        c = c,
-        kwargs...
-      )
+      complexValues[i,j] = p
+    end
+  end
+
+  if juliaSet
+    z0 = complexValues
+    c = fill(juliaPoint, (imageSize[2], imageSize[1]))
+  else
+    z0 = fill(0.0+0.0*im, (imageSize[2], imageSize[1]))
+    c = complexValues
+  end
+
+  print("Drawing fractal...")
+  out = map(
+    (z,c) -> iterateToEscape(
+      z, maxIters = maxIters,
+      bailout=bailout, f=f, c=c
+    ),
+    z0, c
+  )
+  iters = first.(out)
+  iters_normalised = Float64.(iters)
+  zs = last.(out)     
+  print("Done\n")
+  
+
+  print("Normalising...")
+  for j in 1:imageSize[1]
+    for i in 1:imageSize[2]
+      iter = iters[i,j]
+      z = zs[i,j]
       histogram[iter] += 1
       if iter < maxIters
         logzn = log(real(z)*real(z) + imag(z)*imag(z))/2
-        nu = log(logzn/log(2))/log(2)
-        #print("nu: $nu\n")
-        iter = iter + 1 - nu
+        iters_normalised[i,j] = iter + 1 - log(logzn/log(2))/log(2)
       end
-
-      itersReached[i,j] = iter*colorDensity
-
     end
   end
-  print("]\n")
+  itersReached = iters.*colorDensity
+  print("Done.\n")
+
 
   #print("Min itersReached: $(minimum(itersReached))\n")
   cumSumHist = cumsum(histogram[1:size(histogram,1)-1])
